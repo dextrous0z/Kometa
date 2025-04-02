@@ -1,13 +1,17 @@
 # Requirements Update (requirements will need to be reinstalled)
 Add pywin32 requirement at 308 (windows only)
+Add cloudscraper requirement at 1.2.71
 Update gitpython requirement to 3.1.44
+Update lxml requirement to 5.3.1
 Update num2words requirement to 0.5.14
 Update pathvalidate requirement to 3.2.3
 Update pillow requirement to 11.1.0
 Update plexapi requirement to 4.16.1
-Update psutil requirement to 6.1.1
+Update psutil requirement to 7.0.0
+Update python-dotenv requirement to 1.1.0
+Update pywin32 requirement to 310
 Update ruamel-yaml requirement to 0.18.9
-Update setuptools requirement to 75.8.0
+Update setuptools requirement to 78.1.0
 Update tmdbapis requirement to 1.2.28
 
 # Important Changes
@@ -22,15 +26,18 @@ Logic added to Kometa to create `config.yml` if it does not exist from the `conf
 When using `mass_poster_update`, added `ignore_locked` and `ignore_overlays` attributes which will prevent Kometa from resetting the image if the poster field is locked (i.e. a previous mass poster update) or if the item has an Overlay. This can effectively act as a differential update system.
 When using `mass_background_update`, added `ignore_locked` attribute which will prevent Kometa from resetting the image if the poster field is locked (i.e. a previous mass poster update). This can effectively act as a differential update system.
 Added `date` option for schedules
-Added the `--low-priority/-lp` (`KOMETA_LOW_PRIORITY`) command line argument option to run the process at a lower priority. **credit to planetrocky**
+Added the `--low-priority/-lp` (`KOMETA_LOW_PRIORITY`) command line argument option to run the process at a lower priority. **credit to @planetrocky**
 Added `trakt`, `omdb_metascore`, `omdb_tomatoes` ratings sources for mass operations.
 Added `trakt` ratings source for mass episode operations.
 Added GitHub token validation during config validation.
 Added `plex` ratings source for mass operations.
+Add recently-added ratings sources to special-text overlays.
 Added IMDb Interests (sub-genres) to `imdb_search` builder
 Allow `server_preroll` to accept a list
 Changed default `overlay_artwork_filetype` to `webp_lossy` and `overlay_artwork_quality` to 90
 Added `ntfy` as a notification option
+Added `scale_width` and `scale_height` overlay options.
+Added `tmdb_deathday` **credit to @Kevin2kkelly**
 
 # Docs
 Added "getting started" page
@@ -50,6 +57,10 @@ Added Aymara language with Bolivian flag to audio/subtitle overlay languages (cr
 Added `size` setting to languages overlay to double the overlay size.
 Added `hide_text` setting to languages overlay to only show the flags and hide the country text.
 Added `openmatte` edition to default resolution overlay.
+Added `Metacritic Must See Movies` to `other_chart`.
+Moved several `universe` and `playlist` default lists away from Trakt and over to IMDb and MDBList
+Removed default emojis from `seasonal` due to Plex issue with emojis and updated some lists
+Removed BritBox and replaced with ITVX in `streaming` following service shutdown 
 
 # Bug Fixes
 Fixed the `cast` search option for the `imdb_search` builder
@@ -76,3 +87,14 @@ Fixes an issue where `show_missing` would display missing movies against show li
 Fixed an OMDb API issue where API key would intermittently be treated as invalid
 Fixed an issue where Kometa would try to upload and cache images larger than Plex allows (10mb is the upper limit)
 Fixes an issue where `use_subtitles` would ignore `flag_alignment: left`
+Fixed typo `radarr_tag_list` instead of `radarr_taglist` in `builder` module causing `Collection Error: radarr_taglist attribute is blank`
+Fixed NoneError when using a blank `radarr_taglist` or `sonarr_taglist`.
+Fixes an issue with boolean filter matching.
+Fixes an issue where the decade default collection names were incorrect.
+Fixes the playlist default to automatically work with a supplied list.
+Remove an unnecessary request to Plex while processing overlays.
+Fixes issue with ICheckMovies parsing.
+Fixes issue with Letterboxd parsing.
+Fixes issue with the `mojo_domestic` BoxOfficeMojo Builder.
+Fixes an issue updating Trakt User Ratings when the show doesn't exist on TVDb.
+Fixes #2560 count display issue

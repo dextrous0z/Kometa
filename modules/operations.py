@@ -64,19 +64,15 @@ class Operations:
         logger.debug(f"Item Operation: {self.library.items_library_operation}")
         logger.debug("")
 
-        def should_be_deleted(col_in, labels_in, configured_in, managed_in, less_in, ignore_smart_in):
+        def should_be_deleted(col_in, labels_in, configured_in, managed_in, less_in):
             if all((x is None for x in [configured_in, managed_in, less_in])):
                 return False
 
-            less_check = not ignore_smart_in if col_in.smart else True
+            less_check = True
             if less_in is not None:
-                if less_check:
-                    col_count = col_in.childCount if col_in.childCount is not None else 0
-                    less_check = col_count < less_in
-                    logger.trace(f"{col_in.title} - collection size: {col_count} < less: {less_in}, DELETE: {less_check}")
-                else:
-                    logger.trace(f"{col_in.title} - skipping size check:  smart - {col_in.smart}, ignore_smart - {ignore_smart_in}")
-                    
+                col_count = col_in.childCount if col_in.childCount is not None else 0
+                less_check = col_count < less_in
+                logger.trace(f"{col_in.title} - collection size: {col_count} < less: {less_in}, DELETE: {less_check}")
 
             managed_check = True
             if managed_in is not None:
@@ -393,12 +389,12 @@ class Operations:
                                             found_rating = None
                                     elif str(option).startswith("omdb"):
                                         omdb_item = omdb_obj()
-                                        if option == "omdb":
-                                            found_rating = omdb_item.imdb_rating # noqa
-                                        elif option == "omdb_metascore":
+                                        if option == "omdb_metascore":
                                             found_rating = omdb_item.metacritic_rating / 10 if omdb_item.metacritic_rating else None # noqa
                                         elif option == "omdb_tomatoes":
                                             found_rating = omdb_item.rotten_tomatoes / 10 if omdb_item.rotten_tomatoes else None # noqa
+                                        else:
+                                            found_rating = omdb_item.imdb_rating # noqa
                                     elif str(option).startswith("mdb"):
                                         mdb_item = mdb_obj()
                                         if option == "mdb_average":
@@ -877,7 +873,7 @@ class Operations:
 
                     for ep in item.episodes():
                         ep = self.library.reload(ep)
-                        item_title = self.library.get_item_sort_title(ep, atr="title")
+                        item_title = self.library.get_item_display_title(ep)
                         logger.info("")
                         logger.info(f"Processing {item_title}")
                         item_edits = ""
@@ -917,7 +913,7 @@ class Operations:
                                             except Failed:
                                                 tmdb_item = None
                                             found_rating = None
-                                            if option.startswith("plex"):
+                                            if str(option).startswith("plex"):
                                                 ratings = self.library.get_ratings(ep)
                                                 try:
                                                     found_rating = ratings[option]  # noqa
@@ -974,7 +970,7 @@ class Operations:
                         self.library.Plex.saveMultiEdits()
 
             for item_attr, _edits in rating_edits.items():
-                _size = len(rating_edits.items())
+                _size = len(_edits.items())
                 for i, (new_rating, rating_keys) in enumerate(sorted(_edits.items()), 1):
                     logger.info(get_batch_info(i, _size, item_attr, len(rating_keys), display_value=new_rating))
                     self.library.Plex.batchMultiEdits(self.library.load_list_from_cache(rating_keys))
@@ -1133,7 +1129,7 @@ class Operations:
                 col = self.library.reload(col, force=True)
                 labels = [la.tag for la in self.library.item_labels(col)]
 
-                if should_be_deleted(col, labels, configured, managed, less, ignore_smart):
+                if should_be_deleted(col, labels, configured, managed, None if col.smart and ignore_smart else less):
                     try:
                         self.library.delete(col)
                         logger.info(f"{col.title} Deleted")

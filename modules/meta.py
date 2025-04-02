@@ -69,7 +69,7 @@ class DataFile:
     def __init__(self, config, file_type, path, temp_vars, asset_directory, data_type):
         if file_type != "Data":
             logger.info("")
-            logger.info(f"Loading {data_type} {file_type}: {path}")
+            logger.separator(f"Loading {data_type} {file_type}: {path}")
             logger.info("")
         self.config = config
         self.library = None
@@ -775,9 +775,6 @@ class MetadataFile(DataFile):
             self.collections = get_dict("collections", path, library.collections)
             self.templates = get_dict("templates", path)
         else:
-            logger.info("")
-            logger.separator(f"Loading {self.type_str} {file_type}: {path}")
-            logger.info("")
             data = self.load_file(self.type, self.path)
             if self.file_style == "metadata":
                 self.metadata = get_dict("metadata", data, library.metadatas)
@@ -1015,6 +1012,7 @@ class MetadataFile(DataFile):
                                     dynamic_data[k] = v
                             award_methods = {am.lower(): am for am in dynamic_data}
                             event_id = util.parse("Config", "event_id", dynamic_data, parent=f"{map_name} data", methods=award_methods, regex=(r"(ev\d+)", "ev0000003"))
+                            increment = util.parse("Config", "increment", dynamic_data, parent=f"{map_name} data", methods=award_methods, datatype="int", default=1, minimum=1) if "increment" in award_methods else 1
                             extra_template_vars["event_id"] = event_id
                             if event_id not in self.config.IMDb.events_validation:
                                 raise Failed(f"Config Error: {map_name} data only specific Event IDs work with imdb_awards. Event Options: [{', '.join([k for k in self.config.IMDb.events_validation])}]")
@@ -1042,7 +1040,7 @@ class MetadataFile(DataFile):
                                 else:
                                     raise Failed(f"Config Error: {map_name} data {attr} attribute invalid: {position_value}")
 
-                            found_options = year_options[get_position("starting") - 1:get_position("ending")]
+                            found_options = year_options[get_position("starting") - 1:get_position("ending"):increment]
 
                             if not found_options:
                                 raise Failed(f"Config Error: {map_name} data starting/ending range found no valid events")
@@ -1153,14 +1151,15 @@ class MetadataFile(DataFile):
                                     auto_list[k] = v
                         custom_keys = True
                         if "custom_keys" in self.temp_vars:
-                            custom_keys = util.parse("Config", "custom_keys", self.temp_vars["custom_keys"], parent="template_variables", default=custom_keys)
+                            custom_keys = util.parse("Config", "custom_keys", self.temp_vars["custom_keys"], parent="template_variables", datatype="bool", default=custom_keys)
                         elif "custom_keys" in methods:
-                            custom_keys = util.parse("Config", "custom_keys", dynamic, parent=map_name, methods=methods, default=custom_keys)
+                            custom_keys = util.parse("Config", "custom_keys", dynamic, parent=map_name, methods=methods, datatype="bool", default=custom_keys)
                         for add_key, combined_keys in addons.items():
                             if add_key not in all_keys and add_key not in og_exclude:
                                 final_keys = [ck for ck in combined_keys if ck in all_keys]
                                 if custom_keys and final_keys:
-                                    auto_list[add_key] = add_key
+                                    if add_key not in auto_list:
+                                        auto_list[add_key] = add_key
                                     addons[add_key] = final_keys
                                 elif custom_keys:
                                     logger.trace(f"Config Warning: {add_key} Custom Key must have at least one Key")
@@ -1222,7 +1221,7 @@ class MetadataFile(DataFile):
                                 if any([a in str(self.templates[template_name][0]) for a in ["<<value", "<<key", f"<<{auto_type}"]]):
                                     has_var = True
                             if not has_var:
-                                raise Failed(f"Config Error: One {map_name} template: {template_names} is required to have the template variable <<value>>")
+                                raise Failed(f"Config Error: One {map_name} template: {template_names} is required to have the Template Variable <<value>>")
                         elif auto_type in ["number", "list"]:
                             raise Failed(f"Config Error: {map_name} template required for type: {auto_type}")
                         else:
@@ -2394,7 +2393,7 @@ class OverlayFile(DataFile):
                 }
                 for pk, pv in new_pos.items():
                     if pv is None:
-                        raise Failed(f"Config Error: queue missing {pv} attribute")
+                        raise Failed(f"Config Error: queue missing {pk} attribute")
                 final_queue.append(util.parse_cords(new_pos, f"{queue_name} queue", required=True))
                 if overlay_limit and len(final_queue) >= overlay_limit:
                     break

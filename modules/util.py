@@ -140,9 +140,9 @@ def add_dict_list(keys, value, dict_map):
         else:
             dict_map[key] = [int(value)]
 
-def get_list(data, lower=False, upper=False, split=True, int_list=False, trim=True):
+def get_list(data, lower=False, upper=False, split=True, int_list=False, trim=True, return_none=True):
     if split is True:               split = ","
-    if data is None:                return None
+    if data is None:                return None if return_none else []
     elif isinstance(data, list):    list_data = data
     elif isinstance(data, dict):    return [data]
     elif split is False:            list_data = [str(data)]
@@ -448,8 +448,8 @@ def is_date_filter(value, modifier, data, final, current_time):
     return False
 
 def is_number_filter(value, modifier, data):
-    return value is None or (modifier == "" and value == data) \
-            or (modifier == ".not" and value != data) \
+    return value is None or (modifier == "" and value != data) \
+            or (modifier == ".not" and value == data) \
             or (modifier == ".gt" and value <= data) \
             or (modifier == ".gte" and value < data) \
             or (modifier == ".lt" and value >= data) \
@@ -873,6 +873,39 @@ def parse_cords(data, parent, required=False, err_type="Overlay", default=None):
         vertical_offset = dvo
 
     return horizontal_offset, horizontal_align, vertical_offset, vertical_align
+
+def parse_scale(data, parent, err_type="Overlay"):
+    width = None
+    if "scale_width" in data and data["scale_width"] is not None:
+        scale_width = data["scale_width"]
+        per = False
+        if str(scale_width).endswith("%"):
+            scale_width = scale_width[:-1]
+            per = True
+        scale_width = check_num(scale_width)
+        error = f"{err_type} Error: {parent} scale_width: {data['scale_width']} must be a number or a percent"
+        if scale_width is None:
+            raise ValueError(error)
+        if scale_width < 1:
+            raise ValueError(f"{error} greater than 0")
+        width = f"{scale_width}%" if per else scale_width
+
+    height = None
+    if "scale_height" in data and data["scale_height"] is not None:
+        scale_height = data["scale_height"]
+        per = False
+        if str(scale_height).endswith("%"):
+            scale_height = scale_height[:-1]
+            per = True
+        scale_height = check_num(scale_height)
+        error = f"{err_type} Error: {parent} scale_height: {data['scale_height']} must be a number or a percent"
+        if scale_height is None:
+            raise ValueError(error)
+        if scale_height < 1:
+            raise ValueError(f"{error} greater than 0")
+        height = f"{scale_height}%" if per else scale_height
+
+    return width, height
 
 def replace_label(_label, _data):
     replaced = False

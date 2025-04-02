@@ -1,32 +1,36 @@
+---
+hide:
+  - toc
+---
 # Webhooks Attributes
 
 Configuring Webhooks is optional but can allow you to receive notifications when certain events happen.
 
 Discord and Slack Direct webhooks are supported just use the correct urls. 
 
-A `webhooks` mapping is in the root of the config file.
+A `webhooks` mapping is in the root of the config file, sampled below.
 
-Below is a `webhooks` mapping example and the full set of attributes:
-
-```yaml
+```yaml title="config.yml Webhooks sample"
 webhooks:
   error: https://www.myspecialdomain.com/kometa
-  version:
-  run_start:
-  run_end:
-  changes:
+  version: notifiarr
+  run_start: gotify
+  run_end: ntfy
+  delete: notifiarr
+  changes: https://myspecialdomain/kometa
 ```
 
-| Attribute                               |                   Global                   |                  Library                   |                  Collection                  |
-|:----------------------------------------|:------------------------------------------:|:------------------------------------------:|:--------------------------------------------:|
-| [`error`](#error-notifications)         | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |   :fontawesome-solid-circle-xmark:{ .red }   |
-| [`version`](#version-notifications)     | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |   :fontawesome-solid-circle-xmark:{ .red }   |
-| [`run_start`](#run-start-notifications) | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |   :fontawesome-solid-circle-xmark:{ .red }   |
-| [`run_end`](#run-end-notifications)     | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |   :fontawesome-solid-circle-xmark:{ .red }   |
-| [`delete`](#delete-notifications)       | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |   :fontawesome-solid-circle-xmark:{ .red }   |
-| [`changes`](#changes-notifications)     | :fontawesome-solid-circle-check:{ .green } | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-check:{ .green }  |
+| Attribute                               |                   Global                   |                  Library                   |                 Collection                 |
+|:----------------------------------------|:------------------------------------------:|:------------------------------------------:|:------------------------------------------:|
+| [`error`](#error-notifications)         | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |  :fontawesome-solid-circle-xmark:{ .red }  |
+| [`version`](#version-notifications)     | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |  :fontawesome-solid-circle-xmark:{ .red }  |
+| [`run_start`](#run-start-notifications) | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |  :fontawesome-solid-circle-xmark:{ .red }  |
+| [`run_end`](#run-end-notifications)     | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |  :fontawesome-solid-circle-xmark:{ .red }  |
+| [`delete`](#delete-notifications)       | :fontawesome-solid-circle-check:{ .green } |  :fontawesome-solid-circle-xmark:{ .red }  |  :fontawesome-solid-circle-xmark:{ .red }  |
+| [`changes`](#changes-notifications)     | :fontawesome-solid-circle-check:{ .green } | :fontawesome-solid-circle-check:{ .green } | :fontawesome-solid-circle-check:{ .green } |
 
 * Each Attribute can be either a webhook url as a string or a list of webhooks urls.
+
   ```yaml
   webhooks:
     error: https://www.myspecialdomain.com/kometa
@@ -38,7 +42,6 @@ webhooks:
     run_end:
       - https://www.myspecialdomain.com/kometa
       - https://www.myotherdomain.com/kometa
-  ...
   ```
   
 * To send notifications to [Notifiarr](notifiarr.md) just add `notifiarr` to a webhook instead of the webhook url.
@@ -47,8 +50,7 @@ webhooks:
 
 ## Error Notifications
 
-The Error notification will be sent whenever an error occurs. The payload that is sent is different Depending on which 
-level the error occurs.
+The Error notification will be sent whenever an error occurs. The payload that is sent is different Depending on which level the error occurs.
 
 ### Global JSON Payload
 
@@ -168,8 +170,7 @@ The Delete Notification will be sent whenever a collection/playlist is deleted c
 
 ## Changes Notifications
 
-The Changes Notification will be sent after each collection/playlist containing the following payload if the 
-collection/playlist has been created, has new items, or has had items removed.
+The Changes Notification will be sent after each collection/playlist containing the following payload if the collection/playlist has been created, has new items, or has had items removed.
 
 ### JSON Payload
 

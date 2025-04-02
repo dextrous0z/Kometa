@@ -1547,21 +1547,21 @@ class Plex(Library):
 
     def get_ratings(self, item):
         ratings = {
-            'plex_imdb': None,
-            'plex_tmdb': None,
-            'plex_tomatoes': None,
-            'plex_tomatoesaudience': None,
-            }
+            "plex_imdb": None,
+            "plex_tmdb": None,
+            "plex_tomatoes": None,
+            "plex_tomatoesaudience": None,
+        }
         for rating in item.ratings:
             if rating.image.startswith("imdb://"):
-                ratings['plex_imdb'] = rating.value
+                ratings["plex_imdb"] = rating.value
             if rating.image.startswith("themoviedb://"):
-                ratings['plex_tmdb'] = rating.value
+                ratings["plex_tmdb"] = rating.value
             if rating.image.startswith("rottentomatoes://"):
                 if rating.image.endswith("ripe") or rating.image.endswith("rotten"):
-                    ratings['plex_tomatoes'] = rating.value
+                    ratings["plex_tomatoes"] = rating.value
                 else:
-                    ratings['plex_tomatoesaudience'] = rating.value
+                    ratings["plex_tomatoesaudience"] = rating.value
         return ratings
 
     def get_locked_attributes(self, item, titles=None, year_titles=None, item_type=None):
@@ -1674,15 +1674,15 @@ class Plex(Library):
 
         return map_key, attrs
 
-    def get_item_sort_title(self, item_to_sort, atr="titleSort"):
+    def get_item_display_title(self, item_to_sort, sort=False):
         if isinstance(item_to_sort, Album):
-            return f"{getattr(item_to_sort.artist(), atr)} Album {getattr(item_to_sort, atr)}"
+            return f"{item_to_sort.artist().titleSort if sort else item_to_sort.parentTitle} Album {item_to_sort.titleSort if sort else item_to_sort.title}"
         elif isinstance(item_to_sort, Season):
-            return f"{getattr(item_to_sort.show(), atr)} Season {item_to_sort.seasonNumber}"
+            return f"{item_to_sort.show().titleSort if sort else item_to_sort.parentTitle} Season {item_to_sort.seasonNumber}"
         elif isinstance(item_to_sort, Episode):
-            return f"{getattr(item_to_sort.show(), atr)} {item_to_sort.seasonEpisode.upper()}"
+            return f"{item_to_sort.show().titleSort if sort else item_to_sort.grandparentTitle} {item_to_sort.seasonEpisode.upper()}"
         else:
-            return getattr(item_to_sort, atr)
+            return item_to_sort.titleSort if sort else item_to_sort.title
 
     def split(self, text):
         attribute, modifier = os.path.splitext(str(text).lower())
