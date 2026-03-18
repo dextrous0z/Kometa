@@ -63,7 +63,7 @@ imdb_label_options = {
 mass_genre_options = {
     "lock": "Lock Genre", "unlock": "Unlock Genre", "remove": "Remove and Lock Genre", "reset": "Remove and Unlock Genre",
     "tmdb": "Use TMDb Genres", "imdb": "Use IMDb Genres", "omdb": "Use IMDb Genres through OMDb", "tvdb": "Use TVDb Genres",
-    "mal": "Use MyAnimeList Genres", "anidb": "Use AniDB Main Tags",
+    "mal": "Use MyAnimeList Genres", "mal_all": "Use MyAnimeList Genres including Explicit Genres, Themes and Demographics", "anidb": "Use AniDB Main Tags",
     "anidb_3_0": "Use AniDB Main Tags and All 3 Star Tags and above", "anidb_2_5": "Use AniDB Main Tags and All 2.5 Star Tags and above",
     "anidb_2_0": "Use AniDB Main Tags and All 2 Star Tags and above", "anidb_1_5": "Use AniDB Main Tags and All 1.5 Star Tags and above",
     "anidb_1_0": "Use AniDB Main Tags and All 1 Star Tags and above", "anidb_0_5": "Use AniDB Main Tags and All 0.5 Star Tags and above"
@@ -750,16 +750,17 @@ class ConfigFile:
             else:
                 logger.info("mal attribute not found")
 
-            self.AniDB = AniDB(self.Requests, self.Cache, {
-                "language": check_for_attribute(self.data, "language", parent="anidb", default="en")
-            })
             if "anidb" in self.data:
                 logger.separator()
                 logger.info("Connecting to AniDB...")
+
+                self.AniDB = AniDB(self.Requests, self.Cache, {
+                    "language": check_for_attribute(self.data, "language", parent="anidb", default="en"),
+                    "enable_mature": check_for_attribute(self.data, "enable_mature", parent="anidb", default=False)
+                })
+
                 try:
                     self.AniDB.authorize(
-                        check_for_attribute(self.data, "client", parent="anidb", throw=True),
-                        check_for_attribute(self.data, "version", parent="anidb", var_type="int", throw=True),
                         check_for_attribute(self.data, "cache_expiration", parent="anidb", var_type="int", default=60, int_min=1)
                     )
                 except Failed as e:
@@ -768,17 +769,6 @@ class ConfigFile:
                     else:
                         logger.error(e)
                 logger.info(f"AniDB API Connection {'Successful' if self.AniDB.is_authorized else 'Failed'}")
-                try:
-                    self.AniDB.login(
-                        check_for_attribute(self.data, "username", parent="anidb", throw=True),
-                        check_for_attribute(self.data, "password", parent="anidb", throw=True)
-                    )
-                except Failed as e:
-                    if str(e).endswith("is blank"):
-                        logger.warning(e)
-                    else:
-                        logger.error(e)
-                logger.info(f"AniDB Login {'Successful' if self.AniDB.username else 'Failed Continuing as Guest'}")
 
             logger.separator()
 
